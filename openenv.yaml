@@ -1,0 +1,79 @@
+name: KaggleSimEnv
+version: "3.0.0"
+description: >
+  Production-grade OpenEnv RL environment simulating Kaggle competitions.
+  Features hierarchical action categories, causal dataset properties,
+  failure-mode traps, contextual strategy scoring, and 50+ advanced strategies.
+
+author: OpenEnv Hackathon Team
+license: MIT
+
+environment:
+  module: kaggle_sim_env.environment
+  class: KaggleSimEnv
+
+api:
+  framework: fastapi
+  module: api.server
+  app: app
+  port: 7860
+
+action_space:
+  types: 14
+  techniques: 60+
+  hierarchical: true
+  format: '{"action_type": "...", "parameters": {"category": "...", "<key>": "..."}}'
+
+tasks:
+  - id: easy_churn
+    difficulty: easy
+    failure_modes: 3
+    combos: 2
+  - id: medium_fraud
+    difficulty: medium
+    failure_modes: 3
+    combos: 3
+  - id: hard_leaky_noisy
+    difficulty: hard
+    failure_modes: 4
+    combos: 4
+  - id: image_quality
+    difficulty: hard
+    failure_modes: 2
+    combos: 4
+  - id: trajectory_pred
+    difficulty: hard
+    failure_modes: 2
+    combos: 4
+
+grader:
+  module: kaggle_sim_env.grader
+  class: Grader
+  score_range: [0.0, 1.0]
+  weights:
+    performance: 0.40
+    strategy: 0.25
+    combo: 0.20
+    trap_avoidance: 0.15
+
+reward:
+  components:
+    - cv_improvement
+    - strategy_bonus
+    - context_bonus
+    - combo_bonus
+    - redundancy_penalty
+    - irrelevant_penalty
+    - trap_penalty
+    - overfitting_penalty
+    - submission_bonus
+
+baseline:
+  script: baseline/run_baseline.py
+  approach: structured_phases_with_hints
+  requires:
+    - OPENAI_API_KEY
+
+docker:
+  port: 7860
+  dockerfile: Dockerfile
