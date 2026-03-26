@@ -1,3 +1,13 @@
+---
+title: KaggleSimEnv
+emoji: 🚀
+colorFrom: blue
+colorTo: purple
+sdk: docker
+app_file: api/server.py
+pinned: false
+---
+
 # KaggleSimEnv v3
 
 Production-grade **OpenEnv** RL environment simulating Kaggle competitions with **hierarchical action categories**, **causal dataset properties**, **failure-mode traps**, **contextual strategy scoring**, and **50+ advanced strategies**.
