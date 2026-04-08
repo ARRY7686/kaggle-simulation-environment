@@ -7,9 +7,9 @@ Endpoints:
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Optional
 
-from fastapi import Body, FastAPI, HTTPException
+from fastapi import Body, FastAPI, HTTPException, Request
 from pydantic import BaseModel, Field
 
 from kaggle_sim_env.environment import KaggleSimEnv
@@ -78,9 +78,14 @@ class ActionCategoryEntry(BaseModel):
 # ---------------------------------------------------------------------------
 
 @app.post("/reset", response_model=Observation)
-def reset(req: ResetRequest = Body(default=ResetRequest())) -> Observation:
+async def reset(request: Request) -> Observation:
     try:
-        return env.reset(task_id=req.task_id)
+        body = await request.json()
+        task_id = body.get("task_id", "easy_churn")
+    except Exception:
+        task_id = "easy_churn"
+    try:
+        return env.reset(task_id=task_id)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
 
