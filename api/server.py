@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from fastapi import FastAPI, HTTPException
+from fastapi import Body, FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
 from kaggle_sim_env.environment import KaggleSimEnv
@@ -307,4 +307,37 @@ def _baseline_plan(task_id: str) -> list[Action]:
 
 @app.get("/health")
 def health() -> dict[str, str]:
-    return {"status": "ok"}
+    """OpenEnv runtime check expects status == 'healthy'."""
+    return {"status": "healthy"}
+
+
+@app.get("/metadata")
+def metadata() -> dict[str, str]:
+    """OpenEnv standard metadata endpoint."""
+    return {
+        "name": "KaggleSimEnv",
+        "description": (
+            "RL environment simulating Kaggle competitions with hierarchical actions, "
+            "causal dataset properties, failure-mode traps, and contextual scoring."
+        ),
+    }
+
+
+@app.get("/schema")
+def schema_endpoint() -> dict[str, Any]:
+    """OpenEnv combined JSON Schema for action, observation, and state."""
+    return {
+        "action": Action.model_json_schema(),
+        "observation": Observation.model_json_schema(),
+        "state": EnvState.model_json_schema(),
+    }
+
+
+@app.post("/mcp")
+def mcp_stub(payload: dict[str, Any] = Body(default_factory=dict)) -> dict[str, Any]:
+    """Minimal JSON-RPC envelope for OpenEnv runtime validation."""
+    return {
+        "jsonrpc": "2.0",
+        "id": payload.get("id"),
+        "result": {"ok": True},
+    }

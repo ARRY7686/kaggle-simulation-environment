@@ -1,0 +1,22 @@
+[project]
+name = "kaggle-sim-env"
+version = "3.0.0"
+description = "Kaggle Simulation Environment for OpenEnv – RL environment simulating Kaggle competitions"
+authors = [{ name = "Aadi Gupta" }]
+requires-python = ">=3.10"
+
+dependencies = [
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.32.0",
+    "pydantic>=2.9.0",
+    "requests>=2.32.0",
+    "openai>=1.55.0",
+    "openenv-core>=0.2.0",
+]
+
+[project.scripts]
+server = "server.app:main"
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
