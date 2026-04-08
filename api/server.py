@@ -78,7 +78,7 @@ class ActionCategoryEntry(BaseModel):
 # ---------------------------------------------------------------------------
 
 @app.post("/reset", response_model=Observation)
-def reset(req: ResetRequest) -> Observation:
+def reset(req: ResetRequest = Body(default=ResetRequest())) -> Observation:
     try:
         return env.reset(task_id=req.task_id)
     except ValueError as exc:
