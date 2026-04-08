@@ -42,8 +42,15 @@ MAX_TOKENS = 256
 def _require_env(name: str) -> str:
     v = os.getenv(name, "").strip()
     if not v:
-        print(f"Error: required environment variable {name} is not set.", file=sys.stderr)
-        sys.exit(1)
+        print(f"Warning: environment variable {name} is not set, using default.", file=sys.stderr)
+        defaults = {
+            "API_BASE_URL": "https://router.huggingface.co/v1",
+            "MODEL_NAME": "Qwen/Qwen2.5-72B-Instruct",
+        }
+        v = defaults.get(name, "")
+        if not v:
+            print(f"Error: required environment variable {name} is not set.", file=sys.stderr)
+            sys.exit(1)
     return v
 
 
