@@ -109,6 +109,7 @@ def coerce_action_for_step(raw: Any) -> dict[str, Any]:
 
 
 def run_episode(client: OpenAI, model: str, base: str, task_id: str) -> dict[str, Any]:
+    print(f"[START] task={task_id}", flush=True)
     r = requests.post(f"{base}/reset", json={"task_id": task_id}, timeout=REQUEST_TIMEOUT_S)
     r.raise_for_status()
     obs_dict: dict[str, Any] = r.json()
@@ -140,11 +141,16 @@ def run_episode(client: OpenAI, model: str, base: str, task_id: str) -> dict[str
             raise RuntimeError(f"POST /step HTTP {r.status_code}: {detail}")
         step_data = r.json()
         obs_dict = step_data["observation"]
+        reward = step_data.get("reward", {}).get("total", 0.0) if isinstance(step_data.get("reward"), dict) else step_data.get("reward", 0.0)
         steps += 1
+        print(f"[STEP] step={steps} reward={reward}", flush=True)
 
     r = requests.post(f"{base}/grader", timeout=REQUEST_TIMEOUT_S)
     r.raise_for_status()
-    return r.json()
+    grade = r.json()
+    final_score = grade.get("final_score", 0.0)
+    print(f"[END] task={task_id} score={final_score} steps={steps}", flush=True)
+    return grade
 
 
 def _assert_score_range(grade: dict[str, Any], task_id: str) -> None:
