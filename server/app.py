@@ -174,8 +174,13 @@ class KaggleSimEnvironment(Environment[KaggleAction, KaggleObservation, KaggleSt
 
 # ── Create the OpenEnv app ───────────────────────────────────────────────
 
+# Pre-create a singleton so /reset and /step share state across HTTP requests.
+# create_app calls _env_factory() on every request; returning the same instance
+# keeps episode state intact between reset and step calls.
+_singleton_env = KaggleSimEnvironment()
+
 app = create_app(
-    KaggleSimEnvironment,
+    lambda: _singleton_env,
     KaggleAction,
     KaggleObservation,
     env_name="kaggle_sim_env",
