@@ -1,0 +1,23 @@
+# Training dependencies (not needed to run the env server)
+# Install these in your Colab notebook or training environment
+
+# Core training stack
+torch>=2.1.0
+transformers>=4.45.0
+trl>=0.12.0
+datasets>=3.0.0
+accelerate>=1.0.0
+peft>=0.13.0
+
+# Unsloth for faster Colab training (GPU required)
+# Install in Colab with:
+#   pip install unsloth[colab-new] @ git+https://github.com/unslothai/unsloth.git
+unsloth
+
+# Plotting and evaluation
+matplotlib>=3.8.0
+numpy>=1.26.0
+
+# Env client (already in requirements.txt, listed here for standalone use)
+requests>=2.32.0
+openai>=1.55.0

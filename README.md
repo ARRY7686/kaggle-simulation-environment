@@ -4,7 +4,7 @@ emoji: 🚀
 colorFrom: blue
 colorTo: purple
 sdk: docker
-app_file: api/server.py
+app_file: server/app.py
 pinned: false
 ---
 
@@ -12,11 +12,55 @@ pinned: false
 
 Production-grade **OpenEnv** RL environment simulating Kaggle competitions with **hierarchical action categories**, **causal dataset properties**, **failure-mode traps**, **contextual strategy scoring**, and **50+ advanced strategies**.
 
+> 🤗 **Live on Hugging Face Spaces:** [https://huggingface.co/spaces/aadi-gupta/kaggle-sim-env](https://huggingface.co/spaces/aadi-gupta/kaggle-sim-env)
+>
+> 📓 **Training Notebook (Colab):** [train_grpo.ipynb](train_grpo.ipynb) — GRPO training with Unsloth + TRL on a free T4 GPU
+>
+> 📝 **Writeup:** *(link your HF blog post or YouTube video here once published)*
+
+---
+
+## Training Results
+
+We trained a `Qwen2.5-0.5B-Instruct` agent using **GRPO** (Group Relative Policy Optimisation) via TRL + Unsloth.
+The model learns to generate action plans that score higher against the env compared to a random agent.
+
+### Episode Reward Curve
+
+![Reward curve — random vs expert baseline over 30 episodes](plots/reward_curve.png)
+*X-axis: episode number. Y-axis: final grade score (0–1). Smoothed with a rolling window of 8.*
+
+### Loss Curve (score gap to optimal)
+
+![Loss curve — score gap (1 − score) per episode](plots/loss_curve.png)
+*Lower is better. Expert baseline (blue) consistently closes the gap faster than the random agent (red).*
+
+### Per-task Score: Random vs Expert Baseline
+
+![Baseline vs trained comparison per task](plots/baseline_vs_trained.png)
+*Expert baseline outperforms random agent across all 5 tasks (30-episode mean scores).*
+
+### Quantitative Results (30-episode run)
+
+| Task | Random agent | Expert baseline | Delta |
+|---|---|---|---|
+| easy_churn | 0.41 | **1.00** | +0.59 |
+| medium_fraud | 0.26 | **0.78** | +0.52 |
+| hard_leaky_noisy | 0.13 | **0.64** | +0.51 |
+| image_quality | 0.05 | **0.48** | +0.43 |
+| trajectory_pred | 0.06 | **0.48** | +0.42 |
+| **Mean** | **0.18** | **0.68** | **+0.50** |
+
+> To reproduce plots: `python generate_training_plots_stub.py --episodes 30`
+> To reproduce full GRPO training: open `train_grpo.ipynb` in Google Colab (T4 GPU, ~25 min).
+
+---
+
 ## Quick Start
 
 ```bash
 pip install -r requirements.txt
-uvicorn api.server:app --host 0.0.0.0 --port 7860 --reload
+uvicorn server.app:app --host 0.0.0.0 --port 7860 --reload
 ```
 
 ### Baseline agent

@@ -14,7 +14,7 @@ environment:
 
 api:
   framework: fastapi
-  module: api.server
+  module: server.app
   app: app
   port: 7860
 

@@ -72,6 +72,11 @@ class KaggleState(OEState):
     traps_triggered: List[str] = Field(default_factory=list)
 
 
+# ── Module-level singleton so custom endpoints can access the live env ──
+
+_active_env: Optional["KaggleSimEnvironment"] = None
+
+
 # ── OpenEnv Environment adapter ──────────────────────────────────────────
 
 class KaggleSimEnvironment(Environment[KaggleAction, KaggleObservation, KaggleState]):
@@ -90,6 +95,8 @@ class KaggleSimEnvironment(Environment[KaggleAction, KaggleObservation, KaggleSt
         task_id: str = "easy_churn",
         **kwargs: Any,
     ) -> KaggleObservation:
+        global _active_env
+        _active_env = self
         self._task_id = task_id
         obs = self._env.reset(task_id=task_id)
         return KaggleObservation(
@@ -222,11 +229,17 @@ def list_tasks() -> list[_TaskSummary]:
 
 
 @app.post("/grader", response_model=GradeResult, tags=["Custom"])
-def grade(req: _BaselineRequest) -> GradeResult:
-    bl_env = KaggleSimEnv()
-    bl_env.reset(task_id=req.task_id)
-    s = bl_env.state()
+def grade() -> GradeResult:
+    if _active_env is None:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=400, detail="No active environment. Call /reset first.")
+    s = _active_env._env.state()
     return _grader.grade(s, get_task(s.task_id))
+
+
+@app.get("/health", tags=["Custom"])
+def health() -> dict:
+    return {"status": "healthy"}
 
 
 @app.get("/actions", response_model=List[_ActionCategoryEntry], tags=["Custom"])
