@@ -8,10 +8,13 @@ baseline, actions) are mounted on the same FastAPI app.
 
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from fastapi import Request
+from fastapi.responses import JSONResponse
 from pydantic import Field
 
 # Ensure project root is importable
@@ -181,6 +184,32 @@ app = create_app(
     env_name="kaggle_sim_env",
     max_concurrent_envs=1,
 )
+
+
+# ── Compatibility middleware: accept flat {action_type, parameters} on /step ─
+
+@app.middleware("http")
+async def _normalize_step(request: Request, call_next):
+    """Allow clients to POST flat {action_type, parameters} to /step.
+
+    The OpenEnv framework requires {"action": {...}}.  This middleware
+    transparently wraps the flat format so existing clients keep working.
+    """
+    if request.method == "POST" and request.url.path in ("/step", "/step/"):
+        raw = await request.body()
+        if raw:
+            try:
+                data = json.loads(raw)
+                if isinstance(data, dict) and "action_type" in data and "action" not in data:
+                    wrapped = json.dumps({"action": data}).encode()
+
+                    async def _receive():
+                        return {"type": "http.request", "body": wrapped, "more_body": False}
+
+                    request = Request(request.scope, _receive)
+            except (json.JSONDecodeError, Exception):
+                pass
+    return await call_next(request)
 
 
 # ── Custom endpoints (tasks, grader, baseline, actions) ──────────────────
