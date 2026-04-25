@@ -12,7 +12,7 @@ pinned: false
 
 Production-grade **OpenEnv** RL environment simulating Kaggle competitions with **hierarchical action categories**, **causal dataset properties**, **failure-mode traps**, **contextual strategy scoring**, and **50+ advanced strategies**.
 
-> 🤗 **Live on Hugging Face Spaces:** [https://huggingface.co/spaces/aadi-gupta/kaggle-sim-env](https://huggingface.co/spaces/aadi-gupta/kaggle-sim-env)
+> 🤗 **Live on Hugging Face Spaces:** [https://huggingface.co/spaces/Arry7868/Kaggle_Simulation_Environment](https://huggingface.co/spaces/Arry7868/Kaggle_Simulation_Environment)
 >
 > 📓 **Training Notebook (Colab):** [train_grpo.ipynb](train_grpo.ipynb) — GRPO training with Unsloth + TRL on a free T4 GPU
 >
